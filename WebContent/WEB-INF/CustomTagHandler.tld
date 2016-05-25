@@ -1,0 +1,23 @@
+<taglib>
+<tlib-version>1.0</tlib-version>
+<jsp-version>2.0</jsp-version>
+<short-name>Custom Tag Handler TLD</short-name>
+<tag>
+	<name>InsertNewPlayerForm</name>
+	<tag-class>TagHandler.CustomTagHandler</tag-class>
+	<body-content>empty</body-content>
+</tag>
+<tag>
+	<name>InsertNewPlayerResultForm</name>
+	<tag-class>TagHandler.InsertNewPlayerResultHandler</tag-class>
+	<body-content>scriptless</body-content>
+	<attribute>
+		<name>newPlayerFirstName</name>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+	<attribute>
+		<name>newPlayerLastName</name>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+</tag>
+</taglib>
