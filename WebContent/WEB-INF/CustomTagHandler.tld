@@ -20,4 +20,17 @@
 		<rtexprvalue>true</rtexprvalue>
 	</attribute>
 </tag>
+<tag>
+	<name>InsertNewTeamForm</name>
+	<tag-class>TagHandler.InsertNewTeamHandler</tag-class>
+	<body-content>scriptless</body-content>
+	<attribute>
+		<name>newTeamName</name>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+	<attribute>
+		<name>PlayerList</name>
+		<rtexprvalue>true</rtexprvalue>
+	</attribute>
+</tag>
 </taglib>
