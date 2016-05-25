@@ -55,8 +55,7 @@ public class InsertNewPlayerResultHandler extends SimpleTagSupport{
 	
 	public void ReloadPlayerList(){
 		DatabaseConnector connector = new DatabaseConnector();
-		ArrayList<Player> newPlayerList = connector.getPlayerList();
-		DataLoader.setLoadedPlayerList(newPlayerList);
+		connector.LoadPlayers(true);
 	}
 	public String getNewPlayerFirstName() {
 		return newPlayerFirstName;

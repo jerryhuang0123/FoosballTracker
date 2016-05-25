@@ -16,6 +16,15 @@ public class Team {
 		else return false;
 	}
 	
+	public void AddPlayer(Player player){
+		if(PlayerMap.containsKey(player)) return;
+		else PlayerMap.put(player, player.getPlayerID());
+	}
+	
+	public void RemovePlayer(Player player){
+		if(PlayerMap.containsKey(player)) PlayerMap.remove(player);
+	}
+	
 	public HashMap<Player, Integer> getPlayerMap() {
 		return PlayerMap;
 	}

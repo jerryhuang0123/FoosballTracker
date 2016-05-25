@@ -11,7 +11,9 @@ import javax.ejb.Stateless;
 
 import org.eclipse.persistence.internal.descriptors.QueryArgument;
 
+import JavaObject.DataLoader;
 import JavaObject.Player;
+import JavaObject.Team;
 import sun.net.www.content.audio.x_aiff;
 
 import java.awt.List;
@@ -69,9 +71,44 @@ public class DatabaseConnector {
 		CloseConnection();
     }
     
-    public ArrayList<Player> getPlayerList(){
-    	ArrayList<Player> playerList = new ArrayList<Player>();
+    public void LoadTeams(boolean isLoadFinished){
     	ResultSet rSet;
+    	//Clear out data for teams
+    	DataLoader.ClearTeams();
+    	try{
+    		rSet = DatabaseQuery("SELECT Team.TeamID, TeamInfo.PlayerID, Team.TeamName "
+    	+ " FROM Team, TeamInfo " + "WHERE Team.TeamID = TeamInfo.TeamID", true);
+    		while(rSet.next()){
+    			//Check if team does not exist
+    			if(DataLoader.GetTeam(rSet.getInt("TeamID")) == null){
+    				//Create the team and store in DataLoader
+    				Team teamToAdd = new Team();
+    				teamToAdd.setTeamID(rSet.getInt("TeamID"));
+    				teamToAdd.setTeamName(rSet.getString("TeamName"));
+    				DataLoader.AddTeam(teamToAdd);
+    			}
+    			//load player into the team
+    			Player player = DataLoader.GetPlayer(rSet.getInt("PlayerID"));
+    			Team team = DataLoader.GetTeam(rSet.getInt("TeamID"));
+    			if(player != null && team != null){
+        			DataLoader.AddPlayerToTeam(player, team);
+    			}
+    			else{
+    				System.out.println("ERROR: Cannot add player to team because of null");
+    			}
+    			
+    		}
+    	}catch(Exception e){
+    		e.printStackTrace();
+    	}finally{
+    		if(isLoadFinished)CloseConnection();
+    	}
+    }
+    
+    public void LoadPlayers(boolean isLoadFinished){
+    	ResultSet rSet;
+    	//clear out all data for players
+    	DataLoader.ClearPlayers();
 		try {
 			rSet = DatabaseQuery("SELECT * FROM Player", true);
 			while(rSet.next()){
@@ -83,15 +120,14 @@ public class DatabaseConnector {
 				playerToAdd.setLossTotal(rSet.getInt("LossTotal"));
 				playerToAdd.setPointTotal(rSet.getInt("PointTotal"));
 				playerToAdd.setGivenUpPointTotal(rSet.getInt("GivenUpPointTotal"));
-				playerList.add(playerToAdd);
+				DataLoader.AddNewPlayer(playerToAdd);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally{
-			CloseConnection();
+			if(isLoadFinished)CloseConnection();
 		}
-		return playerList;
     }
     
     public ResultSet DatabaseQuery(String SQLQuery, boolean isSelectionQuery) throws SQLException{
