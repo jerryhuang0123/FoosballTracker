@@ -6,19 +6,26 @@ public class Team {
 
 	private int TeamID;
 	private HashMap<Player, Integer> PlayerMap = new HashMap<Player,Integer>();
+	private String TeamName;
 	
 	public int GetSize(){
 		return PlayerMap.size();
 	}
 	
 	public boolean isPlayerOnTeam(Player player){
-		if(PlayerMap.containsKey(player))return true;
+		if(PlayerMap.containsKey(player) && PlayerMap != null)return true;
 		else return false;
+	}
+	
+	public void Log(){
+		System.out.println("TeamID:" + TeamID + " TeamName:" + TeamName);
 	}
 	
 	public void AddPlayer(Player player){
 		if(PlayerMap.containsKey(player)) return;
-		else PlayerMap.put(player, player.getPlayerID());
+		else{
+			if(PlayerMap.size() < 4)PlayerMap.put(player, player.getPlayerID());
+		}
 	}
 	
 	public void RemovePlayer(Player player){
@@ -44,5 +51,4 @@ public class Team {
 	public void setTeamName(String teamName) {
 		TeamName = teamName;
 	}
-	private String TeamName;
 }

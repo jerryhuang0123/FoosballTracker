@@ -61,36 +61,77 @@ public class DatabaseConnector {
     	return this.conn;
     }
     
-    public void AddNewPlayer(String firstName, String lastName) throws SQLException{
+    public void AddNewPlayer(String firstName, String lastName, boolean isLoadFinished) throws SQLException{
     	StringBuilder query = new StringBuilder("INSERT INTO Player (FirstName, LastName) VALUES('");
     	query.append(firstName);
     	query.append("','");
     	query.append(lastName);
     	query.append("');");
 		DatabaseQuery(query.toString(), false);
-		CloseConnection();
+		if(isLoadFinished)CloseConnection();
+    }
+    
+    public int GetLastInsertedID(boolean isLoadFinished) throws SQLException{
+    	ResultSet rSet = DatabaseQuery("SELECT LAST_INSERT_ID();", true);
+    	int returnVal = -1;
+    	if(rSet.next()){
+        	returnVal = rSet.getInt("LAST_INSERT_ID()");
+    	}
+    	if(isLoadFinished) CloseConnection();
+    	if(returnVal == -1) System.out.println("ERROR: Cannot Retrieve Last Inserted ID!");
+    	return returnVal;
+    }
+    
+    public void AddPlayerToTeam(int teamID, int playerID) throws SQLException{
+    	StringBuilder query = new StringBuilder("INSERT INTO TeamInfo (TeamID, PlayerID) VALUES('");
+    	query.append(teamID);
+    	query.append("', '");
+    	query.append(playerID);
+    	query.append("');");
+    	System.out.println(query.toString());
+    	DatabaseQuery(query.toString(), false);
+    	
+    	//Load it locally
+    	DataLoader.AddPlayerToTeam(DataLoader.GetPlayer(playerID), DataLoader.GetTeam(teamID));
+    }
+    
+    public void AddNewTeam(String teamName, boolean isLoadFinished) throws SQLException{
+    	StringBuilder query = new StringBuilder("INSERT INTO Team (TeamName) VALUES('");
+    	query.append(teamName);
+    	query.append("');");
+    	System.out.println(query.toString());
+    	System.out.println("Adding new team " + teamName);
+    	DatabaseQuery(query.toString(), false);
+    	//reload teams
+    	LoadTeams(false);
+    	if(isLoadFinished)CloseConnection();
+    	
     }
     
     public void LoadTeams(boolean isLoadFinished){
     	ResultSet rSet;
     	//Clear out data for teams
     	DataLoader.ClearTeams();
+    	StringBuilder sBuilder = new StringBuilder("SELECT Team.TeamID, TeamInfo.PlayerID, Team.TeamName ");
+    	sBuilder.append(" FROM Team, TeamInfo ");
+    	sBuilder.append("WHERE Team.TeamID = TeamInfo.TeamID");
+    	System.out.println(sBuilder.toString());
     	try{
-    		rSet = DatabaseQuery("SELECT Team.TeamID, TeamInfo.PlayerID, Team.TeamName "
-    	+ " FROM Team, TeamInfo " + "WHERE Team.TeamID = TeamInfo.TeamID", true);
+    		rSet = DatabaseQuery(sBuilder.toString(), true);
     		while(rSet.next()){
-    			//Check if team does not exist
+				//Create the team and store in DataLoader if DataLoader does not have the team
     			if(DataLoader.GetTeam(rSet.getInt("TeamID")) == null){
-    				//Create the team and store in DataLoader
     				Team teamToAdd = new Team();
     				teamToAdd.setTeamID(rSet.getInt("TeamID"));
     				teamToAdd.setTeamName(rSet.getString("TeamName"));
+    				teamToAdd.Log();
     				DataLoader.AddTeam(teamToAdd);
     			}
     			//load player into the team
     			Player player = DataLoader.GetPlayer(rSet.getInt("PlayerID"));
     			Team team = DataLoader.GetTeam(rSet.getInt("TeamID"));
     			if(player != null && team != null){
+    				System.out.println("Adding player " + player.LogString() + " to team " + team.getTeamName());
         			DataLoader.AddPlayerToTeam(player, team);
     			}
     			else{
@@ -132,7 +173,7 @@ public class DatabaseConnector {
     
     public ResultSet DatabaseQuery(String SQLQuery, boolean isSelectionQuery) throws SQLException{
     	ResultSet set = null;
-		if(conn == null){
+		if(conn == null || conn.isClosed()){
 			getConnection();
 		}
 		Statement statement = conn.createStatement();

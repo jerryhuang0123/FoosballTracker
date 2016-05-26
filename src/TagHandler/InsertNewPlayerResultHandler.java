@@ -25,7 +25,7 @@ public class InsertNewPlayerResultHandler extends SimpleTagSupport{
 		JspWriter out = getJspContext().getOut();
 		DatabaseConnector connector = new DatabaseConnector();
 		try {
-			connector.AddNewPlayer(newPlayerFirstName, newPlayerLastName);
+			connector.AddNewPlayer(newPlayerFirstName, newPlayerLastName, true);
 		} catch (SQLException e) {
 			out.println("Failed to Add " + newPlayerFirstName + " " + newPlayerLastName);
 		} catch(Exception e){

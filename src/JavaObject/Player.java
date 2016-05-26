@@ -1,5 +1,7 @@
 package JavaObject;
 
+import com.sun.xml.rpc.processor.modeler.j2ee.xml.string;
+
 public class Player {
 	private int playerID;
 	private String firstName;
@@ -18,6 +20,13 @@ public class Player {
 	}
 	public String getFirstName() {
 		return firstName;
+	}
+	public void Log(){
+		System.out.println("PlayerID: " + playerID + " Player Name: " + firstName + " " + lastName);
+	}
+	
+	public String LogString(){
+		return "PlayerID: " + playerID + " Player Name: " + firstName + " " + lastName;
 	}
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;

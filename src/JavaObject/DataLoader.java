@@ -24,7 +24,6 @@ public class DataLoader {
 	private static ArrayList<Team> loadedTeamList = new ArrayList<Team>();
 	private static HashMap<Integer, Player> IdToPlayerMap = new HashMap<Integer, Player>();
 	private static HashMap<Integer, Team> IdToTeamMap = new HashMap<Integer, Team>();
-	private static HashMap<Team, ArrayList<Player>> teamToPlayerMap = new HashMap<Team, ArrayList<Player>>();
 	
 
 
@@ -40,6 +39,9 @@ public class DataLoader {
 			System.out.println("Players Loaded Successfully");
 			
 		}
+		for(Team team : IdToTeamMap.values()){
+			System.out.println("Loaded team :" + team.getTeamName());
+		}
 	}
 	
 	public static void ClearPlayers(){
@@ -47,15 +49,37 @@ public class DataLoader {
 		loadedPlayerList.clear();
 	}
 	
+	public static boolean isTeamExisted(ArrayList<Player> playerList){
+		int count = 0;
+		for(Team team: IdToTeamMap.values()){
+			count = 0;
+			System.out.println("Checking team " + team.getTeamID());
+			for(Player player: playerList){
+				if(!team.isPlayerOnTeam(player)){
+					//reset count to 0 and go to the next team
+					break;
+				}
+				else{
+					System.out.println("Player " + player.getFirstName() + " exists in " + team.getTeamName());
+					count++;
+				}
+			}
+			if(count == playerList.size()) return true;
+		}
+		return false;
+	}
+	
 	public static void ClearTeams(){
 		IdToTeamMap.clear();
 		loadedTeamList.clear();
-		teamToPlayerMap.clear();
 	}
 	
 	public static void AddTeam(Team team){
-		if(!IdToTeamMap.containsKey(team))IdToTeamMap.put(team.getTeamID(), team);
-		loadedTeamList.add(team);
+		if(!IdToTeamMap.containsKey(team.getTeamID())){
+			IdToTeamMap.put(team.getTeamID(), team);
+			loadedTeamList.add(team);
+			System.out.println("Loaded team to DataLoader : " + team.getTeamName());
+		}
 	}
 	
 	public static void AddNewPlayer(Player newPlayer){
@@ -64,14 +88,10 @@ public class DataLoader {
 	}
 	
 	//returns true if successful (ie. the team has less than 4 players)
-	public static boolean AddPlayerToTeam(Player player, Team team){
-		if(teamToPlayerMap.containsKey(team)){
-			if(teamToPlayerMap.get(team).size() < 4){
-				teamToPlayerMap.get(team).add(player);
-				return true;
-			}
+	public static void AddPlayerToTeam(Player player, Team team){
+		if(!team.isPlayerOnTeam(player)){
+			team.AddPlayer(player);
 		}
-		return false;
 	}
 	
 	public static Player GetPlayer(int playerId){
@@ -101,10 +121,7 @@ public class DataLoader {
 	public static ArrayList<Team> getLoadedTeamList() {
 		return loadedTeamList;
 	}
-
-	public static HashMap<Team, ArrayList<Player>> getPlayerToTeamMap() {
-		return teamToPlayerMap;
-	}
+	
 	public static void setLoadedTeamList(ArrayList<Team> loadedTeamList) {
 		DataLoader.loadedTeamList = loadedTeamList;
 	}
