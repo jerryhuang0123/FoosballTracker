@@ -108,6 +108,52 @@ public class DatabaseConnector {
     	
     }
     
+    public void UpdateTeamScore(Team team, boolean isWinnerTeam, int PointTotal, int OpponentTotal) throws SQLException{
+    	for(Player player: team.getPlayerMap().keySet()){
+    		StringBuilder query = new StringBuilder("UPDATE Player SET ");
+    		if(isWinnerTeam){
+    			query.append("WinTotal=");
+    			query.append(player.getWinTotal()+1);   			
+    		}
+    		else{
+    			query.append("LossTotal=");
+    			query.append(player.getLossTotal() + 1);
+    		}
+    		query.append(", PointTotal=");
+			query.append(player.getPointTotal() + PointTotal);
+			query.append(", GivenUpPointTotal=");
+			query.append(player.getGivenUpPointTotal() + OpponentTotal);
+			query.append(" WHERE PlayerID=");
+			query.append(player.getPlayerID());
+			query.append(";");
+			
+			System.out.println(query.toString());
+			DatabaseQuery(query.toString(), false);
+    	}
+    	//reload teams
+		LoadTeams(false);
+		//Update Game Table
+		
+    }
+    
+    public void UpdateGame(){
+    	
+    }
+    
+    public void AddNewTeam(Player player, boolean isLoadFinished) throws SQLException{
+    	StringBuilder query = new StringBuilder("INSERT INTO Team(TeamName) VALUES('");
+    	query.append(player.getFirstName() + " " + player.getLastName());
+    	query.append("');");
+    	System.out.println(query.toString());
+    	DatabaseQuery(query.toString(), false);
+    	//reload Teams
+    	LoadTeams(false);
+    	//add player to team 
+    	AddPlayerToTeam(GetLastInsertedID(false), player.getPlayerID());
+    	
+    	if(isLoadFinished)CloseConnection();
+    }
+    
     public void LoadTeams(boolean isLoadFinished){
     	ResultSet rSet;
     	//Clear out data for teams
@@ -124,7 +170,6 @@ public class DatabaseConnector {
     				Team teamToAdd = new Team();
     				teamToAdd.setTeamID(rSet.getInt("TeamID"));
     				teamToAdd.setTeamName(rSet.getString("TeamName"));
-    				teamToAdd.Log();
     				DataLoader.AddTeam(teamToAdd);
     			}
     			//load player into the team

@@ -53,7 +53,6 @@ public class DataLoader {
 		int count = 0;
 		for(Team team: IdToTeamMap.values()){
 			count = 0;
-			System.out.println("Checking team " + team.getTeamID());
 			for(Player player: playerList){
 				if(!team.isPlayerOnTeam(player)){
 					//reset count to 0 and go to the next team
@@ -65,6 +64,13 @@ public class DataLoader {
 				}
 			}
 			if(count == playerList.size()) return true;
+		}
+		return false;
+	}
+	
+	public static boolean isTeamExisted(Player player){
+		for(Team team: IdToTeamMap.values()){
+			if(team.GetSize() == 1 && team.isPlayerOnTeam(player)) return true;
 		}
 		return false;
 	}
@@ -108,6 +114,30 @@ public class DataLoader {
 		return null;
 	}
 	
+	public static Team GetTeam(ArrayList<Player> playerList){
+		int count = 0;
+		for(Team team: IdToTeamMap.values()){
+			count = 0;
+			for(Player player: playerList){
+				if(!team.isPlayerOnTeam(player)){
+					//reset count to 0 and go to the next team
+					break;
+				}
+				else{
+					count++;
+				}
+			}
+			if(count == playerList.size()) return team;
+		}
+		return null;
+	}
+	
+	public static Team GetTeam(Player player){
+		for(Team team: IdToTeamMap.values()){
+			if(team.GetSize() == 1 && team.isPlayerOnTeam(player)) return team;
+		}
+		return null;
+	}
 	
 	/////////////////GETTERS AND SETTERS
 	public static ArrayList<Player> getLoadedPlayerList() {

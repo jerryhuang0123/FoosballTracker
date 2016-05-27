@@ -30,4 +30,9 @@
 	<tag-class>TagHandler.InsertNewTeamResultHandler</tag-class>
 	<body-content>scriptless</body-content>
 </tag>
+<tag>
+	<name>OneOnOneGameReport</name>
+	<tag-class>TagHandler.OneOnOneGameReportHandler</tag-class>
+	<body-content>scriptless</body-content>
+</tag>
 </taglib>
