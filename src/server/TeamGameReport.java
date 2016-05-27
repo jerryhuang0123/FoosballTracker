@@ -61,8 +61,7 @@ public class TeamGameReport extends HttpServlet {
 			}
 			else{
 				try{
-					connector.UpdateTeamScore(winnerTeam, true, winnerScore, loserScore);
-					connector.UpdateTeamScore(loserTeam, false, loserScore, winnerScore);
+					connector.UpdateTeamScore(winnerTeam, loserTeam, winnerScore, loserScore);
 					connector.CloseConnection();
 					request.getRequestDispatcher("GameReportSuccessful.jsp").forward(request, response);
 				}catch(NullPointerException e){

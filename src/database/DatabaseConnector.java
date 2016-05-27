@@ -108,30 +108,41 @@ public class DatabaseConnector {
     	
     }
     
-    public void UpdateTeamScore(Team team, boolean isWinnerTeam, int PointTotal, int OpponentTotal) throws SQLException{
-    	for(Player player: team.getPlayerMap().keySet()){
-    		StringBuilder query = new StringBuilder("UPDATE Player SET ");
-    		if(isWinnerTeam){
-    			query.append("WinTotal=");
-    			query.append(player.getWinTotal()+1);   			
-    		}
-    		else{
-    			query.append("LossTotal=");
-    			query.append(player.getLossTotal() + 1);
-    		}
+    public void UpdateTeamScore(Team winnerTeam, Team loserTeam, int winnerPointTotal, int loserPointTotal) throws SQLException{
+    	StringBuilder query = new StringBuilder();
+    	for(Player player: winnerTeam.getPlayerMap().keySet()){
+    		query.append("UPDATE Player SET ");
+			query.append("WinTotal=");
+			query.append(player.getWinTotal()+1);   			
     		query.append(", PointTotal=");
-			query.append(player.getPointTotal() + PointTotal);
+			query.append(player.getPointTotal() + winnerPointTotal);
 			query.append(", GivenUpPointTotal=");
-			query.append(player.getGivenUpPointTotal() + OpponentTotal);
+			query.append(player.getGivenUpPointTotal() + loserPointTotal);
 			query.append(" WHERE PlayerID=");
 			query.append(player.getPlayerID());
 			query.append(";");
-			
-			System.out.println(query.toString());
-			DatabaseQuery(query.toString(), false);
     	}
+    	System.out.println(query.toString());
+    	DatabaseQuery(query.toString(), false);
+    	
+    	query.setLength(0);
+    	for(Player player: loserTeam.getPlayerMap().keySet()){
+    		query.append("UPDATE Player SET ");
+			query.append("LossTotal=");
+			query.append(player.getLossTotal() + 1);
+    		query.append(", GivenUpPointTotal=");
+			query.append(player.getPointTotal() + winnerPointTotal);
+			query.append(", PointTotal=");
+			query.append(player.getGivenUpPointTotal() + loserPointTotal);
+			query.append(" WHERE PlayerID=");
+			query.append(player.getPlayerID());
+			query.append(";");		
+    	}
+    	System.out.println(query.toString());
+		DatabaseQuery(query.toString(), false);
     	//reload teams
 		LoadTeams(false);
+		LoadPlayers(false);
 		//Update Game Table
 		
     }
