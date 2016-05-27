@@ -12,6 +12,6 @@
 <a href = "InsertNewPlayer">Register New Player</a><br>
 <a href = "InsertNewTeam">Register New Team</a><br>
 <a href = "OneOnOneGameReport">Submit 1v1 Game Result</a><br>
-<a href = "TeamVSTeamGameReport">Submit Team VS Team Game Result</a><br>
+<a href = "TeamGameReport">Submit Team VS Team Game Result</a><br>
 </body>
 </html>

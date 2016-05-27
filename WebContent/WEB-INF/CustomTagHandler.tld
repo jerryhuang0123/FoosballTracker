@@ -35,4 +35,9 @@
 	<tag-class>TagHandler.OneOnOneGameReportHandler</tag-class>
 	<body-content>scriptless</body-content>
 </tag>
+<tag>
+	<name>TeamGameReport</name>
+	<tag-class>TagHandler.TeamGameReportHandler</tag-class>
+	<body-content>scriptless</body-content>
+</tag>
 </taglib>
