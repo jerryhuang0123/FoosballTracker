@@ -1,6 +1,7 @@
 package JavaObject;
 
-import com.sun.xml.rpc.processor.modeler.j2ee.xml.string;
+import java.util.Comparator;
+
 
 public class Player {
 	private int playerID;
@@ -10,6 +11,7 @@ public class Player {
 	private int lossTotal = 0;
 	private int pointTotal = 0;
 	private int givenUpPointTotal = 0;
+
 	
 	//getters and setters
 	public int getPlayerID() {
@@ -23,6 +25,16 @@ public class Player {
 	}
 	public void Log(){
 		System.out.println("PlayerID: " + playerID + " Player Name: " + firstName + " " + lastName);
+	}
+	
+	public double getWinPercentage(){
+		int total = winTotal + lossTotal;
+		if(total == 0) return 0;
+		return ((double)winTotal/(double)total);
+	}
+	
+	public int getPointDifference(){
+		return pointTotal - givenUpPointTotal;
 	}
 	
 	public String LogString(){

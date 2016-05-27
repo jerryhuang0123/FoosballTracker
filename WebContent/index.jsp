@@ -9,6 +9,7 @@
 <body>
 <h1>Welcome To RedMane Canada's Foosball Record Tracker!</h1><br>
 
+<a href = "LeaderboardDisplay">See Leaderboard</a><br>
 <a href = "InsertNewPlayer">Register New Player</a><br>
 <a href = "InsertNewTeam">Register New Team</a><br>
 <a href = "OneOnOneGameReport">Submit 1v1 Game Result</a><br>
