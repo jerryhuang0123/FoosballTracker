@@ -21,8 +21,7 @@ import database.DatabaseConnector;
 @WebServlet("/InsertNewTeamResult")
 public class InsertNewTeamResult extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-	@EJB DatabaseConnector connector;
+	private DatabaseConnector connector;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -32,16 +31,10 @@ public class InsertNewTeamResult extends HttpServlet {
     }
 
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-	}
-
-	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		connector = DatabaseConnector.getInstance();
 		String[] selectedCheckBoxes = request.getParameterValues("addPlayerToTeam");
 		String newTeam = request.getParameter("team_name");
 		try {
@@ -60,18 +53,20 @@ public class InsertNewTeamResult extends HttpServlet {
 				//no such team exists
 				else{
 					//Add team into DB
-					connector.AddNewTeam(newTeam, false);
-					int newTeamID = connector.GetLastInsertedID(false);
+					int newTeamID = DataLoader.getNewestTeamID();
+					connector.AddNewTeam(newTeam);
 					System.out.println("Last inserted ID:" + newTeamID);
 					//Add players into team
 					for(String playerId : selectedCheckBoxes){
 						playerId = playerId.replaceAll("\\s","");
 						connector.AddPlayerToTeam(newTeamID, Integer.parseInt(playerId));
 					}
+				
 					request.getRequestDispatcher("InsertNewTeamResult.jsp").forward(request, response);
 				}
-				
 			}
+				
+			
 			else{
 				request.getRequestDispatcher("InsertFailed.jsp").forward(request, response);
 			}
@@ -80,7 +75,8 @@ public class InsertNewTeamResult extends HttpServlet {
 			request.getRequestDispatcher("InsertFailed.jsp").forward(request, response);
 		}
 		
-		
-	}
-
+	}	
 }
+
+
+

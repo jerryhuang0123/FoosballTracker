@@ -32,8 +32,7 @@ public class LeaderboardDisplay extends HttpServlet {
 	private static final String WIN_PERCENTAGE = "WinPercentage";
 	private static final String WIN_TOTAL = "WinTotal";
 	private static final String POINT_DIFF = "PointDifference";
-	
-	@EJB DatabaseConnector connector;
+
 	
     /**
      * @see HttpServlet#HttpServlet()
