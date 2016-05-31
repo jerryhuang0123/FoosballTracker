@@ -8,8 +8,13 @@ import java.util.Properties;
 import java.sql.Connection;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.eclipse.persistence.internal.descriptors.QueryArgument;
+
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import com.sun.appserv.jdbc.DataSource;
 
 import JavaObject.DataLoader;
 import JavaObject.Player;
@@ -17,6 +22,7 @@ import JavaObject.Team;
 import sun.net.www.content.audio.x_aiff;
 
 import java.awt.List;
+import java.security.spec.DSAGenParameterSpec;
 import java.sql.*;
 
 /**
@@ -32,6 +38,8 @@ public class DatabaseConnector {
 	private final String dbName = "sql3120305";
 	private final String userName = "sql3120305";
 	private final String password = "GIavDwjLqD";
+	
+	private String dbJNDILookUp = "java:comp/env/jdbc/sql3120305";
     /**
      * Default constructor. 
      */
@@ -61,25 +69,14 @@ public class DatabaseConnector {
     	return this.conn;
     }
     
-    public void AddNewPlayer(String firstName, String lastName, boolean isLoadFinished) throws SQLException{
+    public void AddNewPlayer(String firstName, String lastName) throws SQLException{
     	StringBuilder query = new StringBuilder("INSERT INTO Player (FirstName, LastName) VALUES('");
     	query.append(firstName);
     	query.append("','");
     	query.append(lastName);
     	query.append("');");
 		DatabaseQuery(query.toString(), false);
-		if(isLoadFinished)CloseConnection();
-    }
-    
-    public int GetLastInsertedID(boolean isLoadFinished) throws SQLException{
-    	ResultSet rSet = DatabaseQuery("SELECT LAST_INSERT_ID();", true);
-    	int returnVal = -1;
-    	if(rSet.next()){
-        	returnVal = rSet.getInt("LAST_INSERT_ID()");
-    	}
-    	if(isLoadFinished) CloseConnection();
-    	if(returnVal == -1) System.out.println("ERROR: Cannot Retrieve Last Inserted ID!");
-    	return returnVal;
+		CloseConnection();
     }
     
     public void AddPlayerToTeam(int teamID, int playerID) throws SQLException{
@@ -93,24 +90,27 @@ public class DatabaseConnector {
     	
     	//Load it locally
     	DataLoader.AddPlayerToTeam(DataLoader.GetPlayer(playerID), DataLoader.GetTeam(teamID));
+    	
+    	CloseConnection();
     }
     
-    public void AddNewTeam(String teamName, boolean isLoadFinished) throws SQLException{
+    public void AddNewTeam(String teamName) throws SQLException{
     	StringBuilder query = new StringBuilder("INSERT INTO Team (TeamName) VALUES('");
     	query.append(teamName);
     	query.append("');");
     	System.out.println(query.toString());
     	System.out.println("Adding new team " + teamName);
     	DatabaseQuery(query.toString(), false);
-    	//reload teams
-    	LoadTeams(false);
-    	if(isLoadFinished)CloseConnection();
     	
+    	CloseConnection();
+    	//reload teams
+    	LoadTeams();
     }
     
     public void UpdateTeamScore(Team winnerTeam, Team loserTeam, int winnerPointTotal, int loserPointTotal) throws SQLException{
     	StringBuilder query = new StringBuilder();
     	for(Player player: winnerTeam.getPlayerMap().keySet()){
+    		query.setLength(0);
     		query.append("UPDATE Player SET ");
 			query.append("WinTotal=");
 			query.append(player.getWinTotal()+1);   			
@@ -121,28 +121,30 @@ public class DatabaseConnector {
 			query.append(" WHERE PlayerID=");
 			query.append(player.getPlayerID());
 			query.append(";");
+			
+	    	System.out.println(query.toString());
+	    	DatabaseQuery(query.toString(), false);
     	}
-    	System.out.println(query.toString());
-    	DatabaseQuery(query.toString(), false);
     	
-    	query.setLength(0);
     	for(Player player: loserTeam.getPlayerMap().keySet()){
+        	query.setLength(0);
     		query.append("UPDATE Player SET ");
 			query.append("LossTotal=");
 			query.append(player.getLossTotal() + 1);
     		query.append(", GivenUpPointTotal=");
-			query.append(player.getPointTotal() + winnerPointTotal);
+			query.append(player.getGivenUpPointTotal() + winnerPointTotal);
 			query.append(", PointTotal=");
-			query.append(player.getGivenUpPointTotal() + loserPointTotal);
+			query.append(player.getPointTotal() + loserPointTotal);
 			query.append(" WHERE PlayerID=");
 			query.append(player.getPlayerID());
 			query.append(";");		
+
+	    	System.out.println(query.toString());
+			DatabaseQuery(query.toString(), false);
     	}
-    	System.out.println(query.toString());
-		DatabaseQuery(query.toString(), false);
     	//reload teams
-		LoadTeams(false);
-		LoadPlayers(false);
+		LoadTeams();
+		LoadPlayers();
 		//Update Game Table
 		
     }
@@ -151,27 +153,28 @@ public class DatabaseConnector {
     	
     }
     
-    public void AddNewTeam(Player player, boolean isLoadFinished) throws SQLException{
+    public void AddNewTeam(Player player) throws SQLException{
+    	int newTeamID = GetAutoIncrementValue("Team");
     	StringBuilder query = new StringBuilder("INSERT INTO Team(TeamName) VALUES('");
     	query.append(player.getFirstName() + " " + player.getLastName());
     	query.append("');");
     	System.out.println(query.toString());
     	DatabaseQuery(query.toString(), false);
     	//reload Teams
-    	LoadTeams(false);
+    	LoadTeams();
     	//add player to team 
-    	AddPlayerToTeam(GetLastInsertedID(false), player.getPlayerID());
+    	AddPlayerToTeam(newTeamID, player.getPlayerID());
     	
-    	if(isLoadFinished)CloseConnection();
+    	CloseConnection();
     }
     
-    public void LoadTeams(boolean isLoadFinished){
+    public void LoadTeams(){
     	ResultSet rSet;
     	//Clear out data for teams
     	DataLoader.ClearTeams();
     	StringBuilder sBuilder = new StringBuilder("SELECT Team.TeamID, TeamInfo.PlayerID, Team.TeamName ");
-    	sBuilder.append(" FROM Team, TeamInfo ");
-    	sBuilder.append("WHERE Team.TeamID = TeamInfo.TeamID");
+    	sBuilder.append(" FROM Team LEFT JOIN TeamInfo ");
+    	sBuilder.append("ON Team.TeamID = TeamInfo.TeamID");
     	System.out.println(sBuilder.toString());
     	try{
     		rSet = DatabaseQuery(sBuilder.toString(), true);
@@ -198,11 +201,11 @@ public class DatabaseConnector {
     	}catch(Exception e){
     		e.printStackTrace();
     	}finally{
-    		if(isLoadFinished)CloseConnection();
+    		CloseConnection();
     	}
     }
     
-    public void LoadPlayers(boolean isLoadFinished){
+    public void LoadPlayers(){
     	ResultSet rSet;
     	//clear out all data for players
     	DataLoader.ClearPlayers();
@@ -223,13 +226,13 @@ public class DatabaseConnector {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally{
-			if(isLoadFinished)CloseConnection();
+			CloseConnection();
 		}
     }
     
     public ResultSet DatabaseQuery(String SQLQuery, boolean isSelectionQuery) throws SQLException{
     	ResultSet set = null;
-		if(conn == null || conn.isClosed()){
+		while(conn == null || conn.isClosed()){
 			getConnection();
 		}
 		Statement statement = conn.createStatement();
@@ -243,6 +246,29 @@ public class DatabaseConnector {
 		
     	
     	return set;
+    }
+    
+    public int GetAutoIncrementValue(String tableName){
+    	StringBuilder query = new StringBuilder("SHOW TABLE STATUS FROM `");
+    	query.append(dbName);
+    	query.append("` ");
+    	query.append(" LIKE '");
+    	query.append(tableName);
+    	query.append("';");
+    	System.out.println(query.toString());
+    	ResultSet set;
+		try {
+			
+			set = DatabaseQuery(query.toString(), true);
+			if(set.next()){
+				System.out.println("Auto_Increment value for table " + tableName + " is " + set.getInt("Auto_increment"));
+		    	return set.getInt("Auto_increment");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	
+		return 0;
     }
     
     public void CloseConnection(){

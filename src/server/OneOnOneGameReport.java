@@ -87,7 +87,7 @@ public class OneOnOneGameReport extends HttpServlet {
 	
 	private void CreateTeam(Player player, DatabaseConnector connector){
 		try {
-			connector.AddNewTeam(player, false);
+			connector.AddNewTeam(player);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}catch(NullPointerException npe){

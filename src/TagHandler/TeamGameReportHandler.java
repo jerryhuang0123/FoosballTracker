@@ -24,6 +24,11 @@ public class TeamGameReportHandler extends SimpleTagSupport {
 				out.println("ID: " + team.getTeamID() + " Name:" + team.getTeamName() + "<br><br>");
 			}
 		}
+		for(Player player : DataLoader.getIdToPlayerMap().values()){
+			out.println("<input type='radio' name='WinnerPlayer' value='");
+			out.println(player.getPlayerID() + "'>");
+			out.println("ID: " + player.getPlayerID() + " Name:" + player.getFirstName() + " " + player.getLastName() + "<br><br>");
+		}
 		out.println("Loser:<br><br>");
 		for(Team team : DataLoader.getIdToTeamMap().values()){
 			if(team.GetSize() > 1){
@@ -31,6 +36,11 @@ public class TeamGameReportHandler extends SimpleTagSupport {
 				out.println(team.getTeamID() + "'>");
 				out.println("ID: " + team.getTeamID() + " Name:" + team.getTeamName() + "<br><br>");
 			}
+		}
+		for(Player player : DataLoader.getIdToPlayerMap().values()){
+			out.println("<input type='radio' name='LoserPlayer' value='");
+			out.println(player.getPlayerID() + "'>");
+			out.println("ID: " + player.getPlayerID() + " Name:" + player.getFirstName() + " " + player.getLastName() + "<br><br>");
 		}
 		out.println("Winner Score(Max 10, Min 0): <br>");
 		out.println("<input type = 'number' name='WinnerScore' min='0' max='10' value='10'><br>");

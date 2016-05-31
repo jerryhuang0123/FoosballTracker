@@ -13,7 +13,8 @@ public class Team {
 	}
 	
 	public boolean isPlayerOnTeam(Player player){
-		if(PlayerMap.containsKey(player) && PlayerMap != null)return true;
+		if(player == null) return false;
+		if(PlayerMap.containsKey(player))return true;
 		else return false;
 	}
 	

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -31,6 +32,10 @@ public class InsertNewTeamResult extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
 
+    @PreDestroy
+    public void destruct(){
+    	connector.CloseConnection();
+    }
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -42,6 +47,8 @@ public class InsertNewTeamResult extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+		int newTeamID = connector.GetAutoIncrementValue("Team");
 		String[] selectedCheckBoxes = request.getParameterValues("addPlayerToTeam");
 		String newTeam = request.getParameter("team_name");
 		try {
@@ -60,9 +67,8 @@ public class InsertNewTeamResult extends HttpServlet {
 				//no such team exists
 				else{
 					//Add team into DB
-					connector.AddNewTeam(newTeam, false);
-					int newTeamID = connector.GetLastInsertedID(false);
-					System.out.println("Last inserted ID:" + newTeamID);
+					connector.AddNewTeam(newTeam);
+					
 					//Add players into team
 					for(String playerId : selectedCheckBoxes){
 						playerId = playerId.replaceAll("\\s","");

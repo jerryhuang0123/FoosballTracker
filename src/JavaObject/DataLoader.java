@@ -34,8 +34,8 @@ public class DataLoader {
 			System.out.println("ERROR: DBConnector is null!");
 		}
 		else{
-			databaseConnector.LoadPlayers(false);
-			databaseConnector.LoadTeams(true); 
+			databaseConnector.LoadPlayers();
+			databaseConnector.LoadTeams(); 
 			System.out.println("Players Loaded Successfully");
 			
 		}
